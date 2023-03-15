@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday!</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous">
+    <style>
+        .vertical-center {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="jumbotron vertical-center">
+
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <div class="card text-center text-white bg-dark">
+                        <img src="pillpanic/back.png" class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <h5 class="card-title">Pill Panic!</h5>
+                            <p class="card-text">Grandma's not happy about being left behind, so she's decided to
+                                sabotage
+                                your upcoming holiday... Stop her!</p>
+                            <a href="pillpanic/pillpanic.html?difficulty=easy" class="btn btn-outline-success"
+                                id="ppe">Easy</a>
+                            <a href="pillpanic/pillpanic.html?difficulty=medium" class="btn btn-outline-warning"
+                                id="ppm">Medium</a>
+                            <a href="pillpanic/pillpanic.html?difficulty=hard" class="btn btn-outline-danger"
+                                id="pph">Hard</a>
+                        </div>
+                        <div class="card-footer text-muted">
+                            A star beside a difficulty means you have completed the game on that difficulty.
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card text-center text-white bg-dark">
+                        <div class="card-body">
+                            <h5 class="card-title">Aerial Assault!</h5>
+                            <p class="card-text">You may have foiled her plan with the pills, but Grandma has one more
+                                trick
+                                up her sleeve...</p>
+                            <a href="pillpanic/pillpanic.html?difficulty=easy" class="btn btn-outline-success">Easy</a>
+                            <a href="pillpanic/pillpanic.html?difficulty=medium"
+                                class="btn btn-outline-warning">Medium</a>
+                            <a href="pillpanic/pillpanic.html?difficulty=hard" class="btn btn-outline-danger">Hard</a>
+                        </div>
+                        <div class="card-footer text-muted">
+                            A star beside a difficulty means you have completed the game on that difficulty.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"></script>
+    <script>
+        if (localStorage.getItem("pillpanic-easy") !== null) {
+            document.getElementById("ppe").innerText += " ★";
+        }
+        if (localStorage.getItem("pillpanic-medium") !== null) {
+            document.getElementById("ppm").innerText += " ★";
+        }
+        if (localStorage.getItem("pillpanic-hard") !== null) {
+            document.getElementById("pph").innerText += " ★";
+        }
+    </script>
+</body>
+
+</html>

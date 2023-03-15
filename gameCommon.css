@@ -1,0 +1,17 @@
+body {
+    background-color: black;
+}
+
+#gameContainer {
+    margin: auto;
+    width: 1280px;
+    height: 720px;
+}
+
+#infoArea { 
+    color: white;
+    margin: auto;
+    width: 1280px;
+    padding-top: 30px;
+    text-align: center;
+}

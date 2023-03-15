@@ -1,0 +1,15 @@
+#canvas {
+    background: url('back.png');
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+@font-face {
+    font-family: "Witch";
+    src: url('font.ttf');
+}
+
+#infoArea {
+    font-family: "Witch" ;
+    font-size: 25px;
+}
