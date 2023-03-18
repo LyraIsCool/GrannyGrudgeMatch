@@ -1,4 +1,4 @@
-var left = right = up = down = false;
+var left = right = up = down = space = control = false;
 
 window.addEventListener("keydown", function (event) {
     if (event.key == "ArrowLeft") {
@@ -12,6 +12,12 @@ window.addEventListener("keydown", function (event) {
     }
     else if (event.key == "ArrowDown") {
         down = true;
+    }
+    else if (event.key == " ") {
+        space = true;
+    }
+    else if (event.key == "Control") {
+        control = true;
     }
 });
 
@@ -27,5 +33,11 @@ window.addEventListener("keyup", function (event) {
     }
     else if (event.key == "ArrowDown") {
         down = false;
+    }
+    else if (event.key == " ") {
+        space = false;
+    }
+    else if (event.key == "Control") {
+        control = false;
     }
 });

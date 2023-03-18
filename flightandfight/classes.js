@@ -83,8 +83,8 @@ class Player extends AnimatedGameObject {
 
     draw() {
         super.draw();
-        
-        
+
+
         /* if (this.sick) {
             context.font = '25px Witch';
             context.fillStyle = 'white';
@@ -93,35 +93,78 @@ class Player extends AnimatedGameObject {
             context.fillRect(100, 7, 150, 28);
             context.fillStyle = 'red';
             context.fillRect(100, 7, (this.sickMax - this.sickCounter) / 2, 28);
-        }*/ 
+        }*/
     }
 }
 
 class Granny extends AnimatedGameObject {
     constructor(x, y, width, height, image, numFrames, speed) {
         super(x, y, width, height, image, numFrames, speed);
+        this.topLeft = [0, 0];
+        this.topMiddle = [(_WIDTH / 2) - (this.width / 2), 0];
+        this.topRight = [_WIDTH - this.width, 0];
+        this.centreLeft = [0, (_HEIGHT / 2) - (this.height / 2)];
+        this.centreMiddle = [(_WIDTH / 2) - (this.width / 2), (_HEIGHT / 2) - (this.height / 2)];
+        this.centreRight = [_WIDTH - this.width, (_HEIGHT / 2) - (this.height / 2)];
+        this.bottomLeft = [0, _HEIGHT - this.height];
+        this.bottomMiddle = [(_WIDTH / 2) - (this.width / 2), _HEIGHT - this.height];
+        this.bottomRight = [_WIDTH - this.width, _HEIGHT - this.height];
+        this.nodes = [this.topLeft, this.topMiddle, this.topRight, this.centreLeft, this.centreMiddle, this.centreRight, this.bottomLeft, this.bottomMiddle, this.bottomRight];
+        this.x = this.centreRight[0];
+        this.y = this.centreRight[1];
+        this.hasLocation = false;
+        this.sin = 0;
+        this.cos = 0;
+        this.movementAngle;
+        this.prevLocation = -1;
+        this.epsilon = 5;
+        this.movementSleepTimer = 0;
+        this.movementSleepMax = 300;
+        this.moving = false;
+        this.radialAttack = false;
     }
 
     update(delta) {
         super.update();
-        /*if (left && this.x > 0) {
-            this.x -= this.speed * delta;
+        if (!this.hasLocation) {
+            let index = this.prevLocation;
+            while (index == this.prevLocation) {
+                index = Math.floor(Math.random() * this.nodes.length);
+            }
+            this.prevLocation = index;
+            this.hasLocation = true;
+            this.movementAngle = Math.atan2(this.nodes[index][1] - this.y, this.nodes[index][0] - this.x);
+            this.sin = Math.sin(this.movementAngle);
+            this.cos = Math.cos(this.movementAngle);
+            this.movementSleepTimer = 0;
+            this.moving = false;
+            this.radialAttack = (Math.floor(Math.random() * 2) == 0);
         }
-        if (right && this.right() < _WIDTH) {
-            this.x += this.speed * delta;
+        else {
+            if (this.movementSleepTimer < this.movementSleepMax) {
+                this.movementSleepTimer++;
+            }
+            else {
+                if (this.x >= this.nodes[this.prevLocation][0] - this.epsilon
+                    && this.x <= this.nodes[this.prevLocation][0] + this.epsilon
+                    && this.y >= this.nodes[this.prevLocation][1] - this.epsilon
+                    && this.y <= this.nodes[this.prevLocation][1] + this.epsilon) {
+                    this.hasLocation = false;
+                }
+                else {
+                    let deltaSpeed = this.speed * delta;
+                    this.x += this.cos * deltaSpeed;
+                    this.y += this.sin * deltaSpeed;
+                }
+                this.moving = true;
+            }
         }
-        if (up && this.y > 0) {
-            this.y -= this.speed * delta;
-        }
-        if (down && this.bottom() < _HEIGHT) {
-            this.y += this.speed * delta;
-        }*/
     }
 
     draw() {
         super.draw();
-        
-        
+
+
         /* if (this.sick) {
             context.font = '25px Witch';
             context.fillStyle = 'white';
@@ -130,7 +173,7 @@ class Granny extends AnimatedGameObject {
             context.fillRect(100, 7, 150, 28);
             context.fillStyle = 'red';
             context.fillRect(100, 7, (this.sickMax - this.sickCounter) / 2, 28);
-        }*/ 
+        }*/
     }
 }
 
@@ -144,6 +187,48 @@ class Bomb extends GameObject {
         this.y += this.speed * delta;
         if (this.y > _HEIGHT) {
             this.active = false;
+        }
+    }
+}
+
+class RadialBomb extends GameObject {
+    constructor(x, y, width, height, speed, angle) {
+        let image = bombImage;
+        super(x, y, width, height, image, speed);
+        this.sin = Math.sin(angle * (Math.PI / 180));
+        this.cos = Math.cos(angle * (Math.PI / 180));
+        this.aliveTime = 0;
+        this.aliveMax = 500;
+    }
+
+    update(delta) {
+        let deltaSpeed = this.speed * delta;
+        this.x += this.cos * deltaSpeed;
+        this.y += this.sin * deltaSpeed;
+        if (this.aliveTime >= this.aliveMax) {
+            this.active = false;
+        }
+        else {
+            this.aliveTime++;
+        }
+    }
+}
+
+class Bullet extends GameObject {
+    constructor(x, y, width, height, speed) {
+        let image = bombImage;
+        super(x, y, width, height, image, speed);
+        this.aliveTime = 0;
+        this.aliveMax = 240;
+    }
+
+    update(delta) {
+        this.x += this.speed * delta;
+        if (this.aliveTime >= this.aliveMax) {
+            this.active = false;
+        }
+        else {
+            this.aliveTime++;
         }
     }
 }

@@ -6,11 +6,18 @@ var quotes;
 var parallaxEntities;
 var player;
 var granny;
+var radialBombs;
+var bullets;
 var score = 0;
 var target = 25;
 var started = false;
 var running = true;
 var won;
+var radialBombFlipFlop = true;
+var radialBombCooldownMax = 50;
+var radialBombCooldown = 0;
+var bulletTimer = 0;
+var bulletCooldown = 10;
 
 function updateEntities(delta) {
     for (arr of allGameEntities) {
@@ -19,7 +26,7 @@ function updateEntities(delta) {
             entity.update(delta);
         }
     }
-    if (bombs["elements"].length <= 1) {
+    if (bombs["elements"].length <= 1 && !getGranny().radialAttack) {
         createBombs();
     }/*
     handleCollisions();
@@ -27,6 +34,12 @@ function updateEntities(delta) {
         running = false;
         won = false;
     }*/
+    radialBombCooldown++;
+    if (radialBombCooldown >= radialBombCooldownMax && getGranny().radialAttack && !getGranny().moving) {
+        createRadialBombs();
+        radialBombCooldown = 0;
+    }
+    checkAndCreateBullets();
 }
 
 function drawEntities() {
@@ -42,19 +55,42 @@ function createBombs() {
     let pattern = patterns[Math.floor(Math.random() * patterns.length)];
     let numCreated = 0;
     for (let i = pattern.length - 1; i >= 0; i--) {
-        let y = -(pattern.length - i - 1) * (_BOMB_HEIGHT + _PILL_VERTICAL_SEPARATOR) - (_BOMB_HEIGHT * 1.5);
+        let y = -(pattern.length - i - 1) * (_BOMB_HEIGHT + _PILL_VERTICAL_SEPARATOR) - (_BOMB_HEIGHT * 2.5);
         for (let j = 0; j < pattern[i].length; j++) {
             if (pattern[i][j] != ' ') {
                 bombs["elements"].push(new Bomb(_SPAWN_POINTS[j], y, _BOMB_WIDTH, _BOMB_HEIGHT, _PILL_SPEED));
-                throwables["elements"].push(new Throwable(granny["elements"][0].middleX(), granny["elements"][0].middleY(), _BOMB_WIDTH / 3, _BOMB_HEIGHT / 3, _THROWABLE_SPEED, _SPAWN_POINTS[j], y, numCreated * 20));
+                throwables["elements"].push(new Throwable(granny["elements"][0].middleX(), granny["elements"][0].y, _BOMB_WIDTH / 3, _BOMB_HEIGHT / 3, _THROWABLE_SPEED, _SPAWN_POINTS[j], y, numCreated * 20));
                 numCreated++;
             }
         }
     }
 }
 
+function createRadialBombs() {
+    let numCreated = 0;
+    let angle = 30;
+    let num = 360 / angle;
+    let offsetAngle = angle / 2;
+    for (let i = 0; i < num; i++) {
+        let thisBombsAngle = 0;
+        if (radialBombFlipFlop) {
+            thisBombsAngle = offsetAngle + (i * angle);
+        }
+        else {
+            thisBombsAngle = i * angle;
+        }
+        radialBombs["elements"].push(new RadialBomb(granny["elements"][0].middleX(), granny["elements"][0].middleY(), _BOMB_WIDTH, _BOMB_HEIGHT, 200, thisBombsAngle));
+        numCreated++;
+    }
+    radialBombFlipFlop = !radialBombFlipFlop;
+}
+
 function getPlayer() {
     return player["elements"][0];
+}
+
+function getGranny() {
+    return granny["elements"][0];
 }
 /*
 function handleCollisions() {
@@ -112,31 +148,42 @@ function drawAndHandleIntro() {
     }
 }*/
 
+function checkAndCreateBullets() {
+    if (bulletTimer <= bulletCooldown) {
+        bulletTimer++;
+    }
+    else {
+        if (space) {
+            let baseSpeed = 750;
+            if (right) {
+                baseSpeed += getPlayer().speed;
+            }
+            bullets["elements"].push(new Bullet(getPlayer().right(), getPlayer().middleY(), 10, 10, baseSpeed));
+            bulletTimer = 0;
+        }
+    }
+}
+
 let elapsed = 0;
 let oldTimeStamp = 0;
 window.onload = function () {
-    /*catchables = { elements: [] };
-    throwables = { elements: [] };
-    particles = { elements: [] };
-    quotes = { elements: [] };
-    fog = { elements: [new Fog()] };
-    player = { elements: [new Player(0, _HEIGHT - _PLAYER_HEIGHT, _PLAYER_WIDTH, _PLAYER_HEIGHT, charImg, _PLAYER_SPEED, _SPEED_MODIFIER)] };*/
     player = { elements: [new Player(100, 100, 140, 114, playerImage, 8, _PLAYER_SPEED)] };
     granny = { elements: [new Granny(500, 400, 140, 204, grannyImage, 7, 250)] };
     bombs = { elements: [] };
     throwables = { elements: [] };
-
+    radialBombs = { elements: [] };
+    bullets = { elements: [] };
     parallaxEntities = { elements: [new ParallaxEntities()] };
-    allGameEntities.push(parallaxEntities, throwables, granny,  bombs, player);
+    allGameEntities.push(parallaxEntities, throwables, granny, bombs, radialBombs, bullets, player);
 
     function gameLoop(timeStamp) {
         elapsed = (timeStamp - oldTimeStamp) / 1000;
         oldTimeStamp = timeStamp;
-        
-        
+
+
         updateEntities(elapsed);
-            drawEntities();
-        
+        drawEntities();
+
         /* if (!started) {
             drawAndHandleIntro();
         }
