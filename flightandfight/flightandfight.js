@@ -20,24 +20,39 @@ var bulletTimer = 0;
 var bulletCooldown = 10;
 
 function updateEntities(delta) {
+    let cachedGranny = getGranny();
     for (arr of allGameEntities) {
         arr["elements"] = arr["elements"].filter(e => e.active == true);
         for (entity of arr["elements"]) {
             entity.update(delta);
         }
     }
-    if (bombs["elements"].length <= 1 && !getGranny().radialAttack) {
-        createBombs();
-    }/*
     handleCollisions();
-    if (missed >= allowableMisses) {
+    /*if (missed >= allowableMisses) {
         running = false;
         won = false;
     }*/
     radialBombCooldown++;
-    if (radialBombCooldown >= radialBombCooldownMax && getGranny().radialAttack && !getGranny().moving) {
-        createRadialBombs();
-        radialBombCooldown = 0;
+    
+    if (cachedGranny.phase == 1) {
+        if (bombs["elements"].length <= 1) {
+            createBombs();
+        }
+    }
+    else if (cachedGranny.phase == 2) {
+        if (radialBombCooldown >= radialBombCooldownMax && !cachedGranny.moving) {
+            createRadialBombs();
+            radialBombCooldown = 0;
+        }
+    }
+    else {
+        if (bombs["elements"].length <= 1 && !cachedGranny.radialAttack) {
+            createBombs();
+        }
+        if (radialBombCooldown >= radialBombCooldownMax && cachedGranny.radialAttack && !cachedGranny.moving) {
+            createRadialBombs();
+            radialBombCooldown = 0;
+        }
     }
     checkAndCreateBullets();
 }
@@ -59,6 +74,7 @@ function createBombs() {
         for (let j = 0; j < pattern[i].length; j++) {
             if (pattern[i][j] != ' ') {
                 bombs["elements"].push(new Bomb(_SPAWN_POINTS[j], y, _BOMB_WIDTH, _BOMB_HEIGHT, _PILL_SPEED));
+                radialBombs["elements"].push(new RadialBomb(granny["elements"][0].middleX(), granny["elements"][0].middleY(), _BOMB_WIDTH, _BOMB_HEIGHT, 600, Math.atan2(getPlayer().middleY() - granny["elements"][0].middleY(), getPlayer().middleX() - granny["elements"][0].middleX()) * 180/Math.PI));
                 throwables["elements"].push(new Throwable(granny["elements"][0].middleX(), granny["elements"][0].y, _BOMB_WIDTH / 3, _BOMB_HEIGHT / 3, _THROWABLE_SPEED, _SPAWN_POINTS[j], y, numCreated * 20));
                 numCreated++;
             }
@@ -92,9 +108,29 @@ function getPlayer() {
 function getGranny() {
     return granny["elements"][0];
 }
-/*
+
 function handleCollisions() {
+    let cachedGranny = getGranny();
     let cachedPlayer = getPlayer();
+    for (entity of bullets["elements"]) {
+        if (aabbCollision(entity, cachedGranny)) {
+            entity.active = false;
+            let damage = entity.tiny ? 1 : 500;
+            cachedGranny.reduceHealth(damage);
+        }
+    }
+    for (entity of radialBombs["elements"]) {
+        if (aabbCollision(entity, cachedPlayer)) {
+            entity.active = false;
+        }
+    }
+    for (entity of bombs["elements"]) {
+        if (aabbCollision(entity, cachedPlayer)) {
+            entity.active = false;
+        }
+    }
+}
+    /*let cachedPlayer = getPlayer();
     for (entity of catchables["elements"]) {
         if (entity.bottom() >= cachedPlayer.y + 10) {
             if (entity.y <= cachedPlayer.lowerCollisionBound - 10) {
@@ -154,14 +190,22 @@ function checkAndCreateBullets() {
     }
     else {
         if (space) {
+            let cachedPlayer = getPlayer();
             let baseSpeed = 750;
             if (right) {
-                baseSpeed += getPlayer().speed;
+                baseSpeed += cachedPlayer.speed;
             }
-            bullets["elements"].push(new Bullet(getPlayer().right(), getPlayer().middleY(), 10, 10, baseSpeed));
+            bullets["elements"].push(new Bullet(cachedPlayer.right(), cachedPlayer.middleY(), 10, 10, baseSpeed, cachedPlayer.tiny));
             bulletTimer = 0;
         }
     }
+}
+
+function aabbCollision(obj1, obj2) {
+    return obj1.x < obj2.x + obj2.width &&
+        obj1.x + obj1.width > obj2.x &&
+        obj1.y < obj2.y + obj2.height &&
+        obj1.height + obj1.y > obj2.y;
 }
 
 let elapsed = 0;

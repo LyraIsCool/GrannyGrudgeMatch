@@ -63,10 +63,26 @@ class AnimatedGameObject extends GameObject {
 class Player extends AnimatedGameObject {
     constructor(x, y, width, height, image, numFrames, speed) {
         super(x, y, width, height, image, numFrames, speed);
+        this.initialWidth = width;
+        this.initialHeight = height;
+        this.initialSpeed = speed;
+        this.tiny = false;
     }
 
     update(delta) {
         super.update();
+        if (control && this.width == this.initialWidth) {
+            this.width = this.initialWidth / 2;
+            this.height = this.initialHeight / 2;
+            this.speed = this.initialSpeed * 1.5;
+            this.tiny = true;
+        }
+        else if (!control && this.width != this.initialWidth) {
+            this.width = this.initialWidth;
+            this.height = this.initialHeight;
+            this.speed = this.initialSpeed;
+            this.tiny = false;
+        }
         if (left && this.x > 0) {
             this.x -= this.speed * delta;
         }
@@ -100,9 +116,9 @@ class Player extends AnimatedGameObject {
 class Granny extends AnimatedGameObject {
     constructor(x, y, width, height, image, numFrames, speed) {
         super(x, y, width, height, image, numFrames, speed);
-        this.topLeft = [0, 0];
-        this.topMiddle = [(_WIDTH / 2) - (this.width / 2), 0];
-        this.topRight = [_WIDTH - this.width, 0];
+        this.topLeft = [0, 20];
+        this.topMiddle = [(_WIDTH / 2) - (this.width / 2), 20];
+        this.topRight = [_WIDTH - this.width, 20];
         this.centreLeft = [0, (_HEIGHT / 2) - (this.height / 2)];
         this.centreMiddle = [(_WIDTH / 2) - (this.width / 2), (_HEIGHT / 2) - (this.height / 2)];
         this.centreRight = [_WIDTH - this.width, (_HEIGHT / 2) - (this.height / 2)];
@@ -122,6 +138,9 @@ class Granny extends AnimatedGameObject {
         this.movementSleepMax = 300;
         this.moving = false;
         this.radialAttack = false;
+        this.health = 3000;
+        this.prevHealth = this.health;
+        this.phase = 1;
     }
 
     update(delta) {
@@ -163,17 +182,36 @@ class Granny extends AnimatedGameObject {
 
     draw() {
         super.draw();
+        let rectHeight = 20;
+        let rectX = this.x;
+        let rectY = this.y - rectHeight;
 
-
-        /* if (this.sick) {
-            context.font = '25px Witch';
-            context.fillStyle = 'white';
-            context.fillText("Slowed!", 10, 30);
+        if (this.health > 2000) {
+            context.fillStyle = 'orange';
+            context.fillRect(rectX, rectY, this.width, rectHeight);
             context.fillStyle = 'green';
-            context.fillRect(100, 7, 150, 28);
+            context.fillRect(rectX, rectY, (this.width / 1000) * (this.health - 2000), rectHeight);
+        }
+        else if (this.health > 1000) {
             context.fillStyle = 'red';
-            context.fillRect(100, 7, (this.sickMax - this.sickCounter) / 2, 28);
-        }*/
+            context.fillRect(rectX, rectY, this.width, rectHeight);
+            context.fillStyle = 'orange';
+            context.fillRect(rectX, rectY, (this.width / 1000) * (this.health - 1000), rectHeight);
+        }
+        else {
+            if (this.health != 0) {
+                context.fillStyle = 'red';
+                context.fillRect(rectX, rectY, (this.width / 1000) * this.health, rectHeight);
+            }
+        }
+    }
+    reduceHealth(amt) {
+        this.prevHealth = this.health;
+        this.health -= amt;
+        if ((this.health < 2000 && this.prevHealth >= 2000) 
+            || (this.health < 1000 && this.prevHealth >= 1000)) {
+            this.phase++;
+        }
     }
 }
 
@@ -215,11 +253,12 @@ class RadialBomb extends GameObject {
 }
 
 class Bullet extends GameObject {
-    constructor(x, y, width, height, speed) {
+    constructor(x, y, width, height, speed, tiny) {
         let image = bombImage;
         super(x, y, width, height, image, speed);
+        this.tiny = tiny;
         this.aliveTime = 0;
-        this.aliveMax = 240;
+        this.aliveMax = tiny ? 40 : 240;
     }
 
     update(delta) {
