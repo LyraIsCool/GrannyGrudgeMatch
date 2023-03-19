@@ -63,6 +63,9 @@ loseImg.src = "lose.png";
 var introImg = new Image();
 introImg.src = "rules.png";
 
+var audio = new Audio('CecileChaminade-ArabesqueNo1.mp3');
+audio.loop = true;
+
 var quoteImages = [];
 for (let i = 1; i < 5; i++) {
     let img = new Image();

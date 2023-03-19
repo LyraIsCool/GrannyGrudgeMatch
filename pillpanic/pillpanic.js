@@ -111,6 +111,7 @@ function drawAndHandleIntro() {
     context.drawImage(introImg, 0, 0, _WIDTH, _HEIGHT);
     if (left || right) {
         started = true;
+        audio.play();
     }
 }
 

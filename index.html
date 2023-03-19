@@ -9,22 +9,57 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         crossorigin="anonymous">
     <style>
+        body {
+            background-color: rgb(5, 5, 5);
+        }
+
         .vertical-center {
             min-height: 100vh;
             display: flex;
             align-items: center;
+        }
+
+        .card {
+            transition: transform 0.5s;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .intro {
+            background-image: url("img/tired.png");
+            background-position: center;
+        }
+        
+        .outro {
+            background-image: url("img/witch.png");
+            background-position: center;
+        }
+
+        .top-buffer {
+            margin-top: 20px;
         }
     </style>
 </head>
 
 <body>
     <div class="jumbotron vertical-center">
-
         <div class="container">
             <div class="row">
                 <div class="col">
+                    <div class="card text-center text-white bg-dark intro">
+                        <div class="card-body">
+                            <h5 class="card-title" style="text-align: right;">Introduction</h5>
+                            <p class="card-text" style="text-align: right;">All about Rebecca and granny...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row top-buffer">
+                <div class="col">
                     <div class="card text-center text-white bg-dark">
-                        <img src="pillpanic/back.png" class="card-img-top" alt="...">
+                        <img src="pillpanic/back.png" class="card-img-top">
                         <div class="card-body">
                             <h5 class="card-title">Pill Panic!</h5>
                             <p class="card-text">Grandma's not happy about being left behind, so she's decided to
@@ -44,17 +79,30 @@
                 </div>
                 <div class="col">
                     <div class="card text-center text-white bg-dark">
+                        <img src="flightandfight/img/original.png" class="card-img-top">
                         <div class="card-body">
                             <h5 class="card-title">Flight and Fight!</h5>
                             <p class="card-text">You may have foiled her plan with the pills, but Grandma has one more
                                 trick up her sleeve...</p>
-                            <a href="flightandfight/flightandfight.html" class="btn btn-outline-success">Easy</a>
-                            <a href="pillpanic/pillpanic.html?difficulty=medium"
-                                class="btn btn-outline-warning">Medium</a>
-                            <a href="pillpanic/pillpanic.html?difficulty=hard" class="btn btn-outline-danger">Hard</a>
+                            <a href="flightandfight/flightandfight.html?difficulty=easy" class="btn btn-outline-success"
+                                id="ffe">Easy</a>
+                            <a href="flightandfight/flightandfight.html?difficulty=medium"
+                                class="btn btn-outline-warning" id="ffm">Medium</a>
+                            <a href="flightandfight/flightandfight.html?difficulty=hard" class="btn btn-outline-danger"
+                                id="ffh">Hard</a>
                         </div>
                         <div class="card-footer text-muted">
                             A star beside a difficulty means you have completed the game on that difficulty.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row top-buffer">
+                <div class="col">
+                    <div class="card text-center text-white bg-dark outro">
+                        <div class="card-body">
+                            <h5 class="card-title" style="text-align: left;">Epilogue</h5>
+                            <p class="card-text" style="text-align: left;">The end...?</p>
                         </div>
                     </div>
                 </div>
@@ -73,6 +121,15 @@
         }
         if (localStorage.getItem("pillpanic-hard") !== null) {
             document.getElementById("pph").innerText += " ★";
+        }
+        if (localStorage.getItem("flightandfight-easy") !== null) {
+            document.getElementById("ffe").innerText += " ★";
+        }
+        if (localStorage.getItem("flightandfight-medium") !== null) {
+            document.getElementById("ffm").innerText += " ★";
+        }
+        if (localStorage.getItem("flightandfight-hard") !== null) {
+            document.getElementById("ffh").innerText += " ★";
         }
     </script>
 </body>

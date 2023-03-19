@@ -50,6 +50,25 @@ grannyImage.src = "img/grannyspritesheet.png";
 
 var bombImage = new Image();
 bombImage.src = "img/bomb.png";
+
+var heartImage = new Image();
+heartImage.src = "img/heart.png";
+
+var winImage = new Image();
+winImage.src = "img/win.jpg";
+
+var loseImage = new Image();
+loseImage.src = "img/lose.jpg";
+
+var introImage = new Image();
+introImage.src = "img/instructions.jpg";
+
+var bulletmage = new Image();
+bulletmage.src = "img/bullet.png";
+
+var audio = new Audio('RichardWagner-RideOfTheValkyries.mp3');
+audio.loop = true;
+
 /*
 var pillsImg = new Image();
 pillsImg.src = "pills.png";
@@ -69,14 +88,7 @@ chickenImg.src = "chicken.png";
 var fogImg = new Image();
 fogImg.src = "fog.png";
 
-var winImg = new Image();
-winImg.src = "win.png";
 
-var loseImg = new Image();
-loseImg.src = "lose.png";
-
-var introImg = new Image();
-introImg.src = "rules.png";
 
 var quoteImages = [];
 for (let i = 1; i < 5; i++) {

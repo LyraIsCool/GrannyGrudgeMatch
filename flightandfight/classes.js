@@ -8,12 +8,19 @@ class GameObject {
         this.speed = speed;
         this.active = true;
         this.visible = true;
+        this.collisionWidth = width;
+        this.collisionHeight = height;
     }
 
     draw() {
         if (this.visible) {
             context.drawImage(this.image, this.x, this.y, this.width, this.height);
         }
+    }
+
+    update() {
+        this.collisionX = this.x;
+        this.collisionY = this.y;
     }
 
     right() {
@@ -46,6 +53,7 @@ class AnimatedGameObject extends GameObject {
     }
 
     update() {
+        super.update();
         this.currFrameTimer++;
         if (this.currFrameTimer >= this.maxFrameTime) {
             this.currFrameTimer = 0;
@@ -67,21 +75,29 @@ class Player extends AnimatedGameObject {
         this.initialHeight = height;
         this.initialSpeed = speed;
         this.tiny = false;
+        this.hp = 3;
+        this.collisionDeadzone = 20;
     }
 
     update(delta) {
         super.update();
+        this.collisionX = this.x + this.collisionDeadzone;
+        this.collisionY = this.y + this.collisionDeadzone;
+        this.collisionWidth = this.width - (this.collisionDeadzone * 2);
+        this.collisionHeight = this.height - (this.collisionDeadzone * 2);
         if (control && this.width == this.initialWidth) {
             this.width = this.initialWidth / 2;
             this.height = this.initialHeight / 2;
             this.speed = this.initialSpeed * 1.5;
             this.tiny = true;
+            this.collisionDeadzone = 10;
         }
         else if (!control && this.width != this.initialWidth) {
             this.width = this.initialWidth;
             this.height = this.initialHeight;
             this.speed = this.initialSpeed;
             this.tiny = false;
+            this.collisionDeadzone = 20;
         }
         if (left && this.x > 0) {
             this.x -= this.speed * delta;
@@ -99,26 +115,26 @@ class Player extends AnimatedGameObject {
 
     draw() {
         super.draw();
+        for (let i = 0; i < this.hp; i++) {
+            context.drawImage(heartImage, (i * 25) + 10, 0, 25, 25);
+        }
+    }
 
+    reduceHealth() {
+        this.hp--;
+    }
 
-        /* if (this.sick) {
-            context.font = '25px Witch';
-            context.fillStyle = 'white';
-            context.fillText("Slowed!", 10, 30);
-            context.fillStyle = 'green';
-            context.fillRect(100, 7, 150, 28);
-            context.fillStyle = 'red';
-            context.fillRect(100, 7, (this.sickMax - this.sickCounter) / 2, 28);
-        }*/
+    kill() {
+        this.hp = 0;
     }
 }
 
 class Granny extends AnimatedGameObject {
     constructor(x, y, width, height, image, numFrames, speed) {
         super(x, y, width, height, image, numFrames, speed);
-        this.topLeft = [0, 20];
-        this.topMiddle = [(_WIDTH / 2) - (this.width / 2), 20];
-        this.topRight = [_WIDTH - this.width, 20];
+        this.topLeft = [0, 50];
+        this.topMiddle = [(_WIDTH / 2) - (this.width / 2), 50];
+        this.topRight = [_WIDTH - this.width, 50];
         this.centreLeft = [0, (_HEIGHT / 2) - (this.height / 2)];
         this.centreMiddle = [(_WIDTH / 2) - (this.width / 2), (_HEIGHT / 2) - (this.height / 2)];
         this.centreRight = [_WIDTH - this.width, (_HEIGHT / 2) - (this.height / 2)];
@@ -141,6 +157,7 @@ class Granny extends AnimatedGameObject {
         this.health = 3000;
         this.prevHealth = this.health;
         this.phase = 1;
+        this.collisionDeadzone = 20;
     }
 
     update(delta) {
@@ -178,6 +195,10 @@ class Granny extends AnimatedGameObject {
                 this.moving = true;
             }
         }
+        this.collisionX = this.x + this.collisionDeadzone;
+        this.collisionY = this.y + this.collisionDeadzone;
+        this.collisionWidth = this.width - (this.collisionDeadzone * 2);
+        this.collisionHeight = this.height - (this.collisionDeadzone * 2);
     }
 
     draw() {
@@ -204,6 +225,10 @@ class Granny extends AnimatedGameObject {
                 context.fillRect(rectX, rectY, (this.width / 1000) * this.health, rectHeight);
             }
         }
+        context.strokeStyle = "black";
+        context.beginPath();
+        context.rect(rectX, rectY, this.width, rectHeight);
+        context.stroke();
     }
     reduceHealth(amt) {
         this.prevHealth = this.health;
@@ -222,6 +247,7 @@ class Bomb extends GameObject {
     }
 
     update(delta) {
+        super.update();
         this.y += this.speed * delta;
         if (this.y > _HEIGHT) {
             this.active = false;
@@ -240,6 +266,7 @@ class RadialBomb extends GameObject {
     }
 
     update(delta) {
+        super.update();
         let deltaSpeed = this.speed * delta;
         this.x += this.cos * deltaSpeed;
         this.y += this.sin * deltaSpeed;
@@ -254,7 +281,11 @@ class RadialBomb extends GameObject {
 
 class Bullet extends GameObject {
     constructor(x, y, width, height, speed, tiny) {
-        let image = bombImage;
+        let image = bulletmage;
+        if (tiny) {
+            width /= 2;
+            height /= 2;
+        }
         super(x, y, width, height, image, speed);
         this.tiny = tiny;
         this.aliveTime = 0;
@@ -262,6 +293,7 @@ class Bullet extends GameObject {
     }
 
     update(delta) {
+        super.update();
         this.x += this.speed * delta;
         if (this.aliveTime >= this.aliveMax) {
             this.active = false;
@@ -287,6 +319,7 @@ class Throwable extends GameObject {
     }
 
     update(delta) {
+        super.update();
         if (this.timeSlept < this.sleepTimer) {
             this.timeSlept++;
         }
@@ -314,6 +347,7 @@ class Particles extends GameObject {
     }
 
     update(delta) {
+        super.update();
         this.y += this.speed * delta;
         this.speed += this.gravity;
         if (this.y > _HEIGHT) {
@@ -333,6 +367,7 @@ class Quote extends GameObject {
     }
 
     update(delta) {
+        super.update();
         this.aliveCount++;
         if (this.aliveCount > this.lifetime) {
             this.active = false;

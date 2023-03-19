@@ -14,10 +14,20 @@ var started = false;
 var running = true;
 var won;
 var radialBombFlipFlop = true;
-var radialBombCooldownMax = 50;
+var radialBombCooldownMax;
 var radialBombCooldown = 0;
 var bulletTimer = 0;
 var bulletCooldown = 10;
+
+if (difficulty == "easy") {
+    radialBombCooldownMax = 75;
+}
+else if (difficulty == "hard") {
+    radialBombCooldownMax = 35;
+}
+else {
+    radialBombCooldownMax = 50;
+}
 
 function updateEntities(delta) {
     let cachedGranny = getGranny();
@@ -28,12 +38,16 @@ function updateEntities(delta) {
         }
     }
     handleCollisions();
-    /*if (missed >= allowableMisses) {
+    if (player["elements"][0].hp <= 0) {
         running = false;
         won = false;
-    }*/
+    }
     radialBombCooldown++;
-    
+    if (cachedGranny.health <= 0) {
+        running = false;
+        won = true;
+        localStorage.setItem(`flightandfight-${difficulty}`, "won");
+    }
     if (cachedGranny.phase == 1) {
         if (bombs["elements"].length <= 1) {
             createBombs();
@@ -70,16 +84,16 @@ function createBombs() {
     let pattern = patterns[Math.floor(Math.random() * patterns.length)];
     let numCreated = 0;
     for (let i = pattern.length - 1; i >= 0; i--) {
-        let y = -(pattern.length - i - 1) * (_BOMB_HEIGHT + _PILL_VERTICAL_SEPARATOR) - (_BOMB_HEIGHT * 2.5);
+        let y = -(pattern.length - i - 1) * (_BOMB_HEIGHT + _PILL_VERTICAL_SEPARATOR) - _BOMB_HEIGHT - 300;
         for (let j = 0; j < pattern[i].length; j++) {
             if (pattern[i][j] != ' ') {
                 bombs["elements"].push(new Bomb(_SPAWN_POINTS[j], y, _BOMB_WIDTH, _BOMB_HEIGHT, _PILL_SPEED));
-                radialBombs["elements"].push(new RadialBomb(granny["elements"][0].middleX(), granny["elements"][0].middleY(), _BOMB_WIDTH, _BOMB_HEIGHT, 600, Math.atan2(getPlayer().middleY() - granny["elements"][0].middleY(), getPlayer().middleX() - granny["elements"][0].middleX()) * 180/Math.PI));
-                throwables["elements"].push(new Throwable(granny["elements"][0].middleX(), granny["elements"][0].y, _BOMB_WIDTH / 3, _BOMB_HEIGHT / 3, _THROWABLE_SPEED, _SPAWN_POINTS[j], y, numCreated * 20));
+                throwables["elements"].push(new Throwable(granny["elements"][0].middleX(), granny["elements"][0].y, _BOMB_WIDTH / 3, _BOMB_HEIGHT / 3, _THROWABLE_SPEED, _SPAWN_POINTS[j], y, 0));
                 numCreated++;
             }
         }
     }
+    radialBombs["elements"].push(new RadialBomb(granny["elements"][0].middleX(), granny["elements"][0].middleY(), _BOMB_WIDTH, _BOMB_HEIGHT, 600, Math.atan2(getPlayer().middleY() - granny["elements"][0].middleY(), getPlayer().middleX() - granny["elements"][0].middleX()) * 180/Math.PI));
 }
 
 function createRadialBombs() {
@@ -115,74 +129,43 @@ function handleCollisions() {
     for (entity of bullets["elements"]) {
         if (aabbCollision(entity, cachedGranny)) {
             entity.active = false;
-            let damage = entity.tiny ? 1 : 500;
+            let damage = entity.tiny ? 5 : 100;
             cachedGranny.reduceHealth(damage);
         }
     }
     for (entity of radialBombs["elements"]) {
         if (aabbCollision(entity, cachedPlayer)) {
             entity.active = false;
+            cachedPlayer.reduceHealth();
         }
     }
     for (entity of bombs["elements"]) {
         if (aabbCollision(entity, cachedPlayer)) {
             entity.active = false;
+            cachedPlayer.reduceHealth();
         }
     }
-}
-    /*let cachedPlayer = getPlayer();
-    for (entity of catchables["elements"]) {
-        if (entity.bottom() >= cachedPlayer.y + 10) {
-            if (entity.y <= cachedPlayer.lowerCollisionBound - 10) {
-                if (entity.right() >= cachedPlayer.x + 10) {
-                    if (entity.x <= cachedPlayer.right() - 10) {
-                        entity.active = false;
-                        for (let i = 0; i < 3; i++) {
-                            particles["elements"].push(new Particles(entity.middleX(), entity.middleY(), entity.type));
-                        }
-                        if (entity.type == "c") {
-                            cachedPlayer.sick = true;
-                            cachedPlayer.sickCounter = 0;
-                        }
-                        else if (entity.type == "s") {
-                            score++;
-                            if (score >= target) {
-                                won = true;
-                                running = false;
-                                localStorage.setItem(`pillpanic-${difficulty}`, "won");
-                            }
-                        }
-                        else if (entity.type = "p") {
-                            won = false;
-                            running = false;
-                        }
-                    }
-                }
-            }
-        }
+    if (aabbCollision(cachedGranny, cachedPlayer)) {
+        cachedPlayer.kill();
     }
-}
-
-function drawScore() {
-    _SCORE_AREA.innerHTML = `Score: ${score} / ${target}`;
-    _MISSES_AREA.innerHTML = `Misses allowed: ${allowableMisses - missed}`;
 }
 
 function drawEndScreen() {
     if (won) {
-        context.drawImage(winImg, 0, 0, _WIDTH, _HEIGHT);
+        context.drawImage(winImage, 0, 0, _WIDTH, _HEIGHT);
     }
     else {
-        context.drawImage(loseImg, 0, 0, _WIDTH, _HEIGHT);
+        context.drawImage(loseImage, 0, 0, _WIDTH, _HEIGHT);
     }
 }
 
 function drawAndHandleIntro() {
-    context.drawImage(introImg, 0, 0, _WIDTH, _HEIGHT);
-    if (left || right) {
+    context.drawImage(introImage, 0, 0, _WIDTH, _HEIGHT);
+    if (left || right || up || down || space || control) {
         started = true;
+        audio.play();
     }
-}*/
+}
 
 function checkAndCreateBullets() {
     if (bulletTimer <= bulletCooldown) {
@@ -192,20 +175,17 @@ function checkAndCreateBullets() {
         if (space) {
             let cachedPlayer = getPlayer();
             let baseSpeed = 750;
-            if (right) {
-                baseSpeed += cachedPlayer.speed;
-            }
-            bullets["elements"].push(new Bullet(cachedPlayer.right(), cachedPlayer.middleY(), 10, 10, baseSpeed, cachedPlayer.tiny));
+            bullets["elements"].push(new Bullet(cachedPlayer.right(), cachedPlayer.middleY(), 30, 10, baseSpeed, cachedPlayer.tiny));
             bulletTimer = 0;
         }
     }
 }
 
 function aabbCollision(obj1, obj2) {
-    return obj1.x < obj2.x + obj2.width &&
-        obj1.x + obj1.width > obj2.x &&
-        obj1.y < obj2.y + obj2.height &&
-        obj1.height + obj1.y > obj2.y;
+    return obj1.collisionX < obj2.collisionX + obj2.collisionWidth &&
+        obj1.collisionX + obj1.collisionWidth > obj2.collisionX &&
+        obj1.collisionY < obj2.collisionY + obj2.collisionHeight &&
+        obj1.collisionHeight + obj1.collisionY > obj2.collisionY;
 }
 
 let elapsed = 0;
@@ -224,21 +204,16 @@ window.onload = function () {
         elapsed = (timeStamp - oldTimeStamp) / 1000;
         oldTimeStamp = timeStamp;
 
-
-        updateEntities(elapsed);
-        drawEntities();
-
-        /* if (!started) {
+        if (!started) {
             drawAndHandleIntro();
         }
         else if (running) {
             updateEntities(elapsed);
             drawEntities();
-            drawScore();   
         }
         else {
             drawEndScreen();
-        }*/
+        }
         window.requestAnimationFrame(gameLoop);
     }
     window.requestAnimationFrame(gameLoop);

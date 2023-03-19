@@ -1,9 +1,9 @@
 @font-face {
-    font-family: "Witch";
-    src: url('font.ttf');
+    font-family: "Adventure";
+    src: url('font.otf');
 }
 
 #infoArea {
-    font-family: "Witch" ;
+    font-family: "Adventure" ;
     font-size: 25px;
 }
