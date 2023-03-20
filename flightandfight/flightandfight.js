@@ -129,7 +129,7 @@ function handleCollisions() {
     for (entity of bullets["elements"]) {
         if (aabbCollision(entity, cachedGranny)) {
             entity.active = false;
-            let damage = entity.tiny ? 5 : 100;
+            let damage = entity.tiny ? 5 : 10;
             cachedGranny.reduceHealth(damage);
         }
     }

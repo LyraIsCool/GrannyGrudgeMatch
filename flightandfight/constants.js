@@ -1,7 +1,7 @@
 const context = document.getElementById("canvas").getContext("2d");
 const _WIDTH = 1280;
 const _HEIGHT = 720;
-const _SPAWN_POINTS = [1, _WIDTH / 6, _WIDTH / 6 * 2, _WIDTH / 6 * 3, _WIDTH / 6 * 4, _WIDTH / 6 * 5];
+const _SPAWN_POINTS = [1, _WIDTH / 6, _WIDTH / 6 * 2, _WIDTH / 6 * 3, _WIDTH / 6 * 4, _WIDTH / 6 * 5, _WIDTH - 30];
 const _PLAYER_WIDTH = 166;
 const _PLAYER_HEIGHT = 186;
 const _PLAYER_SPEED = 400;

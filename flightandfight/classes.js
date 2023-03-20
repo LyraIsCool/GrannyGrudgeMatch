@@ -244,6 +244,9 @@ class Bomb extends GameObject {
     constructor(x, y, width, height, speed) {
         let image = bombImage;
         super(x, y, width, height, image, speed);
+        let arr = [1, -1]
+        this.xDir = arr[Math.floor(Math.random() * arr.length)];
+
     }
 
     update(delta) {
@@ -251,6 +254,9 @@ class Bomb extends GameObject {
         this.y += this.speed * delta;
         if (this.y > _HEIGHT) {
             this.active = false;
+        }
+        if (difficulty == "hard") {
+            this.x += 15 * delta * this.xDir;
         }
     }
 }
